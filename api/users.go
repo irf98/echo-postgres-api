@@ -3,6 +3,8 @@ package api
 import (
 	"awesomeProject/api/models"
 	"awesomeProject/api/services"
+	"awesomeProject/config"
+	"encoding/json"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
@@ -56,7 +58,26 @@ func Login(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Incorrect password.")
 	}
 
-	return c.JSON(http.StatusOK, user)
+	token := config.GenerateJWT(user)
+	t := config.ResponseToken{Token: token}
+
+	j, err := json.Marshal(t)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	err = config.GenerateSession(c, user)
+
+	return c.JSON(http.StatusOK, j)
+}
+
+func Logout(c echo.Context) error {
+	err := config.DeleteSession(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error login out.")
+	}
+
+	return c.JSON(http.StatusOK, "Logged out.")
 }
 
 func GetUsers(c echo.Context) error {

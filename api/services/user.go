@@ -7,7 +7,7 @@ import (
 )
 
 func CreateUser(user *models.User, e string, p []byte) error {
-	user.ID = xid.New().Counter()
+	user.ID = xid.New().String()
 	user.Email = e
 	user.Password = p
 
