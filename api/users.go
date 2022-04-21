@@ -21,7 +21,7 @@ func CreateUser(c echo.Context) error {
 
 	err = services.GetUserByEmail(&user, data["email"])
 	if err == nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "User already exists")
+		return echo.NewHTTPError(http.StatusBadRequest, "User already exists.")
 	}
 
 	password, _ := bcrypt.GenerateFromPassword([]byte(data["password"]), 14)
@@ -31,12 +31,7 @@ func CreateUser(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusCreated, echo.Map{
-		"id":         user.ID,
-		"email":      user.Email,
-		"password":   user.Password,
-		"created_at": user.CreatedAt,
-	})
+	return c.JSON(http.StatusCreated, user)
 }
 
 func Login(c echo.Context) error {
@@ -177,22 +172,4 @@ func DeleteUser(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, "User successfully deleted.")
-}
-
-func DeleteUserPermanently(c echo.Context) error {
-	user := models.User{}
-
-	id := c.Param("id")
-
-	err := services.GetDeletedUser(&user, id)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "User does not exists.")
-	}
-
-	err = services.DeleteUserPermanently(&user, id)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	return c.JSON(http.StatusOK, "User permanently deleted.")
 }

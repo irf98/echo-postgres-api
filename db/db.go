@@ -22,7 +22,7 @@ func Init() *gorm.DB {
 		log.Fatalln(err)
 	}
 
-	err = db.AutoMigrate(&models.User{})
+	err = db.AutoMigrate(&models.User{}, models.Post{})
 	if err != nil {
 		log.Fatalln(err)
 	}

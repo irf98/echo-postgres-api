@@ -17,19 +17,13 @@ func CreateUser(user *models.User, e string, p []byte) error {
 }
 
 func GetUsers(users *[]models.User) error {
-	res := db.DB().Select([]string{"id", "email", "password"}).Find(users)
+	res := db.DB().Raw("SELECT * FROM users;").Scan(users)
 
 	return res.Error
 }
 
 func GetUserById(user *models.User, id string) error {
-	res := db.DB().First(user, id)
-
-	return res.Error
-}
-
-func GetDeletedUser(user *models.User, id string) error {
-	res := db.DB().Unscoped().Where("id = ?", id).First(user)
+	res := db.DB().Raw("SELECT * FROM users WHERE id = ?;", id).Scan(user)
 
 	return res.Error
 }
@@ -53,13 +47,7 @@ func UpdateUserPassword(user *models.User, id string, p []byte) error {
 }
 
 func DeleteUser(user *models.User, id string) error {
-	res := db.DB().Delete(user, id)
-
-	return res.Error
-}
-
-func DeleteUserPermanently(user *models.User, id string) error {
-	res := db.DB().Unscoped().Delete(user, id)
+	res := db.DB().Raw("DELETE FROM users WHERE id = ?;", id).Scan(user)
 
 	return res.Error
 }
