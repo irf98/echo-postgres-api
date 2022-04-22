@@ -24,6 +24,9 @@ func CreatePost(c echo.Context) error {
 	}
 
 	err = services.GetUserByEmail(&user, sess.Values["user"].(string))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
 
 	err = services.CreatePost(&post, user, data["body"], data["tag"])
 	if err != nil {
@@ -130,4 +133,62 @@ func DeletePost(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, "Post successfully deleted.")
+}
+
+func CreateReply(c echo.Context) error {
+	user := models.User{}
+	post := models.Post{}
+	var data = make(map[string]string)
+
+	id := c.Param("id")
+
+	err := c.Bind(&data)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	sess, _ := session.Get("session", c)
+	if sess.Values["user"] == nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Login before you reply!")
+	}
+
+	err = services.GetUserByEmail(&user, sess.Values["user"].(string))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	err = services.CreateReply(&post, user, id, data["body"], data["tag"])
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusCreated, post)
+}
+
+func GetPostReplies(c echo.Context) error {
+	var posts []models.Post
+
+	id := c.Param("id")
+
+	err := services.GetPostReplies(&posts, id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	if len(posts) == 0 {
+		return echo.NewHTTPError(http.StatusBadRequest, "Posts does not have replies!")
+	}
+
+	return c.JSON(http.StatusOK, posts)
+}
+
+func GetTrendingPosts(c echo.Context) error {
+	var posts []models.Post
+
+	err := services.GetTrendingPosts(&posts)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, posts)
 }

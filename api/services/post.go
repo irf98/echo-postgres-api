@@ -54,3 +54,28 @@ func DeletePost(post *models.Post, id string) error {
 
 	return res.Error
 }
+
+func CreateReply(post *models.Post, user models.User, p string, b string, t string) error {
+	post.ID = xid.New().String()
+	post.ParentID = &p
+	post.Author = user
+	post.Body = b
+	post.Tag = t
+	post.UpVotes, post.DownVotes, post.Reputation = 0, 0, 0
+
+	res := db.DB().Create(post)
+
+	return res.Error
+}
+
+func GetPostReplies(posts *[]models.Post, id string) error {
+	res := db.DB().Where("parent_id = ?", id).Find(posts)
+
+	return res.Error
+}
+
+func GetTrendingPosts(posts *[]models.Post) error {
+	res := db.DB().Raw("SELECT * FROM posts ORDER BY reputation DESC LIMIT 10;").Scan(posts)
+
+	return res.Error
+}

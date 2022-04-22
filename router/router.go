@@ -28,9 +28,12 @@ func New() *echo.Echo {
 	// posts
 	p := e.Group("/api/posts")
 
+	p.GET("/trending", api.GetTrendingPosts)
 	p.GET("/:id", api.GetUserPosts)
+	p.GET("/:id/replies", api.GetPostReplies)
 	p.POST("/tag", api.GetPostsByTag)
 	p.POST("/", api.CreatePost)
+	p.POST("/:id/reply", api.CreateReply)
 	p.PUT("/:id/upvote", api.UpVotePost)
 	p.PUT("/:id/downvote", api.DownVotePost)
 	p.DELETE("/:id", api.DeletePost)
